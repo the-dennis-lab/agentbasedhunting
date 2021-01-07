@@ -18,20 +18,6 @@ from mesa import Agent
     # with normal distribution of dwell and move times/lengths
     # uses last chirp to bias movements
 
-
-def get_distance(pos_1, pos_2):
-    """Get the distance between two points
-
-    Args:
-        pos_1, pos_2: Coordinate tuples for both points.
-
-    """
-    x1, y1 = pos_1
-    x2, y2 = pos_2
-    dx = x1 - x2
-    dy = y1 - y2
-    return math.sqrt(dx ** 2 + dy ** 2)
-
 def get_soundscape_value(pos_mouse,pos_cricket):
     """Use the location of mouse and cricket
     to determine localization information
@@ -41,16 +27,16 @@ def get_soundscape_value(pos_mouse,pos_cricket):
     x2,y2 = pos_cricket
     dx = math.fabs(x1-x2)
     dy = math.fabs(y1-y2)
-    # distance = math.sqrt(dx ** 2 + dy ** 2)
+    distance = math.sqrt(dx ** 2 + dy ** 2)
     # from center to "far hallway" of adj hex
     # x 21 + 14*(# hex away) +1 for <
     # y 23 + 17*(# hex away) +1 for <
-    # GET FACING INFO
-    if dx < 36 or dy < 41:
+
+    if distance < 40:
         soundscape_value = 3
-    elif dx < 64 or dy < 75:
+    elif distance < 80:
         soundscape_value = 2
-    elif dx < 92 or dy < 109:
+    elif distance < 100:
         soundscape_value = 1
     else:
         soundscape_value = 0
@@ -60,13 +46,21 @@ def get_soundscape_value(pos_mouse,pos_cricket):
     #    soundscape_value = soundscape_value - 1
     return soundscape_value
 
+
+
 class SoundAgent(Agent):
-    def __init__(self,pos,model,soundscape_value=0)
+    def __init__(self,pos,model,soundscape_value=0):
         super().__init__(pos,model)
-        self.pos = pos
         self.soundscape_value = soundscape_value
 
-    def get_sounds_value(pos_mouse,pos_cricket):
+    def step(self):
+        if chirp is 1:
+            self.soundscape_value = get_soundscape_value(pos_mouse,pos_cricket)
+        else:
+            self.soundscape_value = 0
+
+    def advance(self):
+        self.soundscape_value=0 #always zero unless cricket is chirping
 
 
 class MouseAgent(Agent):
@@ -77,14 +71,20 @@ class MouseAgent(Agent):
         self.chirp = chirp
         self.soundscape_value = soundscape_value
 
-    def get_sound(self, pos):
+    def get_direction(self, pos):
         this_cell = self.model.grid.get_cell_list_contents([pos])
         for agent in this_cell:
-            if type(agent) is sound:
+            if type(agent) is SoundAgent:
                 return agent #this used to be checking for sugar
+
+    def is_occupied(self, pos):
+        this_cell = self.model.grid.get_cell_list_contents([pos])
+        return len(this_cell) > 1
 
     def move(self):
         # Get neighborhood within travel distance
+        # first generate travel distance
+        random.randint(5,25)
         neighbors = [
             i
             for i in self.model.grid.get_neighborhood(
@@ -93,10 +93,15 @@ class MouseAgent(Agent):
             if not self.is_occupied(i)
         ]
         neighbors.append(self.pos)
-        # Look for location with the most sugar/sound
-        max_sound = max([self.get_sound(pos).amount for pos in neighbors])
+        # STOPPEDHERE
+        # want to change this to find all empty cells and
+        # 1. move randomly in a single direction until a junction
+        # 2. if there's sound info move toward belief
+        # 3. sometimes don't move
+        # was from ants 'looking' for most sugar
+        dir_belief = max([self.get_sound(pos).amount for pos in neighbors])
         candidates = [
-            pos for pos in neighbors if self.get_sound(pos).amount == max_sound
+            pos for pos in neighbors if self.get_sound(pos).amount == dir_belief
         ]
         # Narrow down to the nearest ones
         min_dist = min([get_distance(self.pos, pos) for pos in candidates])
