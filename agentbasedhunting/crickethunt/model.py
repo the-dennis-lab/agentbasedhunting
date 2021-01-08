@@ -18,6 +18,7 @@ from mesa.datacollection import DataCollector
 
 from .agents import MouseAgent, Cricket
 from .schedule import RandomActivationByBreed
+import numpy as np
 
 
 class HuntingGrounds(Model):
@@ -27,7 +28,7 @@ class HuntingGrounds(Model):
 
     verbose = True  # Print-monitoring
 
-    def __init__(self, height=50, width=50:
+    def __init__(self, height=85, width=115:
         """
         Create a new model with the given parameters.
         """
@@ -42,12 +43,39 @@ class HuntingGrounds(Model):
             {"MouseAgent": lambda m: m.schedule.get_breed_count(MouseAgent)}
         )
 
-        # Create sound
-        import numpy as np
+        # add cricket agent in one of the center circles
+        # starting off based on hex_map made 2021_01_07
+        # TODO later make this flexible?
+        hexnum=6
+        numyhex = hexnum-1
+        xval = 33
+        xincrement = 10
+        yval = 8
+        yincrement = 7
+        cricket_chambers = tuple((xval,yval))
 
-        sugar_distribution = np.genfromtxt("sugarscape_cg/sugar-map.txt")
+        for rowval in np.arange(1,2*(hexnum)):
+            if rowval < 7:
+                yval = yval+(yincrement*(rowval-1))
+                numyhex = numyhex+1
+                for num in np.arange(1,numyhex+1):
+                    cricket_chambers.append((xval+xincrement,yval))
+            else:
+                numyhex = numyhex-1
+                for num in np.arange(1,numyhex+1):
+                    cricket_chambers.append((xval+xincrement,yval))
+                    # TODO fix for DRY above two lines repeated
+
+        # TODO make mouse start flexible
+        mouse_chambers=[(58,2),(17,21),(17,65),(58,84),(98,65),(98,21)]
+        # now have the x,y locations for mouse intro points and cricket locations
+        # for each initiation of the model, pick from these lists randomly
+
+        # Create grass patches
+        hex_distribution = np.genfromtxt("crickethunt/hex_map.txt")
         for _, x, y in self.grid.coord_iter():
-            max_sugar = sugar_distribution[x, y]
+            # STOPPED HERE
+            max_sugar = hex_distribution[x, y]
             sugar = Cricket((x, y), self, max_sugar)
             self.grid.place_agent(sugar, (x, y))
             self.schedule.add(sugar)
