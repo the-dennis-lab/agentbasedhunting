@@ -21,28 +21,25 @@ def MouseAgent_portrayal(agent):
 
     if type(agent) is MouseAgent:
         portrayal["Shape"] = "crickethunt/resources/mouseoutline.png"
-        portrayal["w"] = 2
-        portrayal["h"] = 1
+        portrayal["scale"]=1.5
         portrayal["Layer"] = 1
 
     elif type(agent) is CricketAgent:
-        if agent.amount != 0:
-            portrayal["Color"] = color_dic[agent.amount]
-        else:
-            portrayal["Color"] = "#ffffff"
-        portrayal["Shape"] = "rect"
-        portrayal["Filled"] = "true"
+        portrayal["Shape"] = "crickethunt/resources/cricket.png"
         portrayal["Layer"] = 0
-        portrayal["w"] = 1
-        portrayal["h"] = 1
+        portrayal["scale"]=3
 
     return portrayal
 
+#portrayal, gridwidth, gridheight, pageusewidth, pageuseheight
+canvas_element = CanvasGrid(MouseAgent_portrayal, 115, 85, 575, 425)
+#chart_element = ChartModule([{"Label": "SsAgent", "Color": "#AA0000"}])
 
-canvas_element = CanvasGrid(MouseAgent_portrayal, 50, 50, 500, 500)
-chart_element = ChartModule([{"Label": "SsAgent", "Color": "#AA0000"}])
+#server = ModularServer(
+#    HuntingGrounds, [canvas_element, chart_element], "Hunting Simulation"
+#)
 
 server = ModularServer(
-    HuntingGrounds, [canvas_element, chart_element], "Hunting Simulation"
+    HuntingGrounds, [canvas_element], "Hunting Simulation"
 )
 # server.launch()

@@ -74,7 +74,7 @@ class HuntingGrounds(Model):
         # Create grass patches
         hex_distribution = np.genfromtxt("crickethunt/hex_map.txt")
         for _, x, y in self.grid.coord_iter():
-            # STOPPED HERE
+# STOPPED HERE
             max_sugar = hex_distribution[x, y]
             sugar = Cricket((x, y), self, max_sugar)
             self.grid.place_agent(sugar, (x, y))
