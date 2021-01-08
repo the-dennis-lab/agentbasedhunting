@@ -20,27 +20,23 @@ from .agents import MouseAgent, Cricket
 from .schedule import RandomActivationByBreed
 
 
-class SoundscapeCg(Model):
+class HuntingGrounds(Model):
     """
-    Soundscape 2 Constant Growback
+    HuntingGrounds
     """
 
     verbose = True  # Print-monitoring
 
-    def __init__(self, height=50, width=50, initial_population=100):
+    def __init__(self, height=50, width=50:
         """
-        Create a new Constant Growback model with the given parameters.
-
-        Args:
-            initial_population: Number of population to start with
+        Create a new model with the given parameters.
         """
 
         # Set parameters
         self.height = height
         self.width = width
-        self.initial_population = initial_population
 
-        self.schedule = RandomActivationByBreed(self)
+        self.schedule = SimultaneousActivationByBreed(self)
         self.grid = MultiGrid(self.height, self.width, torus=False)
         self.datacollector = DataCollector(
             {"MouseAgent": lambda m: m.schedule.get_breed_count(MouseAgent)}
