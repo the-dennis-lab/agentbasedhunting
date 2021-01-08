@@ -121,19 +121,21 @@ class MouseAgent(Agent):
 
     def advance(self):
         #advance info
+        self.move()
 
 
-class Cricket(Agent):
-    # want cricket to chirp every 2 s as default
-    # then add if the mouse has moved, wait 2s
-    def __init__(self, pos, model, chirp):
+class CricketAgent(Agent):
+    def __init__(self, pos, model, chirp=0):
         super().__init__(pos, model)
         self.amount = chirp
         self.chirp = chirp
 
+    # want cricket to chirp every 2 s as default
+    # then add if the mouse has moved, wait 2s
+
     def step(self):
         # get mouse movement info
-
+        self.chirp=0
     def advance(self):
         # if mouse moved, reset amount
         if self.amount > 20: #tenths of seconds
@@ -143,9 +145,8 @@ class Cricket(Agent):
             self.amount = self.amount + 1
             self.chirp = 0
 
-# may want to make the neighborhood check actually happen from the cricket,
-# since that's the sound source, and informs where "sugar"/sound is
-# want to be able to know for any position of cricket,
-# what directional information does the sound provide for the mouse?
-
-# also need to somehow "end" when the cricket gets eaten
+    # may want to make the neighborhood check actually happen from the cricket,
+    # since that's the sound source, and informs where "sugar"/sound is
+    # want to be able to know for any position of cricket,
+    # what directional information does the sound provide for the mouse?
+    # also need to somehow "end" when the cricket gets eaten

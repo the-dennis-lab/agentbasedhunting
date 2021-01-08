@@ -16,8 +16,8 @@ from mesa import Model
 from mesa.space import MultiGrid
 from mesa.datacollection import DataCollector
 
-from .agents import MouseAgent, Cricket
-from .schedule import RandomActivationByBreed
+from .agents import MouseAgent, CricketAgent
+from .schedule import SimultaneousActivationByBreed
 import numpy as np
 
 
@@ -28,7 +28,7 @@ class HuntingGrounds(Model):
 
     verbose = True  # Print-monitoring
 
-    def __init__(self, height=85, width=115:
+    def __init__(self, height=85, width=115):
         """
         Create a new model with the given parameters.
         """
@@ -52,7 +52,7 @@ class HuntingGrounds(Model):
         xincrement = 10
         yval = 8
         yincrement = 7
-        cricket_chambers = tuple((xval,yval))
+        cricket_chambers = [tuple((xval,yval))]
 
         for rowval in np.arange(1,2*(hexnum)):
             if rowval < 7:
@@ -76,18 +76,18 @@ class HuntingGrounds(Model):
         for _, x, y in self.grid.coord_iter():
 # STOPPED HERE
             max_sugar = hex_distribution[x, y]
-            sugar = Cricket((x, y), self, max_sugar)
+            sugar = CricketAgent((x, y), self, max_sugar)
             self.grid.place_agent(sugar, (x, y))
             self.schedule.add(sugar)
 
         # Create agent:
-        for i in range(self.initial_population):
             x = self.random.randrange(self.width)
             y = self.random.randrange(self.height)
             sugar = self.random.randrange(6, 25)
             metabolism = self.random.randrange(2, 4)
             vision = self.random.randrange(1, 6)
-            ssa = MouseAgent((x, y), self, False, sugar, metabolism, vision)
+            #MouseAgent(self, pos, model, moore=False, chirp=0, soundscape_value=0):
+            ssa = MouseAgent(self, (x, y))
             self.grid.place_agent(ssa, (x, y))
             self.schedule.add(ssa)
 
