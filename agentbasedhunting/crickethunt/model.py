@@ -40,7 +40,7 @@ class HuntingGrounds(Model):
         self.schedule = SimultaneousActivationByBreed(self)
         self.grid = MultiGrid(self.height, self.width, torus=False)
         self.datacollector = DataCollector(
-            {"MouseAgent": lambda m: m.schedule.get_breed_count(MouseAgent)}
+            {"MouseAgent": lambda m: 1}
         )
 
 
