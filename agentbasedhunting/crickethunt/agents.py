@@ -60,8 +60,7 @@ class CricketAgent(Agent):
         # did the mouse move?
         mouse_movement = [cell
             for cell in self.model.grid.get_neighborhood(self,pos,moore=True,include_center=False,radius=115)
-            if type(agent) is MouseAgent:
-                return agent]
+                if type(agent) is MouseAgent]
         if mouse_movement.speed > 1:
             #if mouse moved, reset counter
             self.countdown = 0
@@ -74,10 +73,11 @@ class SoundAgent(Agent):
         self.soundscape_value = soundscape_value
 
     def step(self):
-        cricket = [agent for agent in self.model.grid.get_cell_list_contents(cell):
-                for cell in self.model.grid.get_neighborhood(self,pos,moore=True,include_center=False,radius=115):
-                    if type(agent) is CricketAgent]
-        if cricket.chirp = 1:
+        cricket = [agent for agent in self.model.grid.get_cell_list_contents(cell)
+                for cell in self.model.grid.get_neighborhood(self,pos,moore=True,include_center=False,radius=115)
+                if type(agent) is CricketAgent]
+
+        if cricket.chirp == 1:
             crickit_pos = cricket.pos
             #get my sound value
             # get distance from cricket
@@ -92,8 +92,9 @@ class SoundAgent(Agent):
     def advance(self):
         self.soundscape_value=0 #always resets to zero
 
+
 class GrassAgent(Agent):
-    def __init__(self,pos,is_grass):
+    def __init__(self,pos,model,is_grass):
         super().__init__(pos,model)
         self.value = is_grass
     def step(self):
@@ -106,9 +107,9 @@ class MouseAgent(Agent):
     def __init__(
         self,
         model,
-        pos,
-        speed,
-        velocity,
+        pos=[0,0],
+        speed=0,
+        velocity=0,
         belief = [0,0],
         range = 30,
         heading=0,

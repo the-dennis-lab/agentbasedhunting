@@ -1,10 +1,8 @@
 from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.modules import CanvasGrid, ChartModule
 
-from .agents import MouseAgent, SoundAgent, CricketAgent
+from .agents import MouseAgent, SoundAgent, CricketAgent, GrassAgent
 from .model import HuntingGrounds
-
-color_dic = {3: "#000000", 2: "#666666", 1: "#999999", 0: "#00A757"}
 
 def MouseAgent_portrayal(agent):
     if agent is None:
@@ -12,27 +10,28 @@ def MouseAgent_portrayal(agent):
 
     portrayal = {}
 
-    if type(agent) is HexAgent:
+    if type(agent) is GrassAgent and agent.value == 1:
         portrayal["Shape"] = "rect"
+        portrayal["Filled"] = "true"
         portrayal["w"] = 1
         portrayal["h"] = 1
         portrayal["Color"] = "#009205"
-        portrayal["Layer"] = 1
+        portrayal["Layer"] = 0
 
     if type(agent) is MouseAgent:
         portrayal["Shape"] = "crickethunt/resources/mouseoutline.png"
-        portrayal["scale"]=1.5
-        portrayal["Layer"] = 1
+        portrayal["scale"]= 1
+        portrayal["Layer"] = 0
 
     elif type(agent) is CricketAgent:
         portrayal["Shape"] = "crickethunt/resources/cricket.png"
         portrayal["Layer"] = 0
-        portrayal["scale"]=3
+        portrayal["scale"]= 2
 
     return portrayal
 
-#portrayal, gridwidth, gridheight, pageusewidth, pageuseheight
-canvas_element = CanvasGrid(MouseAgent_portrayal, 115, 85, 575, 425)
+canvas_element = CanvasGrid(MouseAgent_portrayal, 85, 115, 500, 500)
+
 #chart_element = ChartModule([{"Label": "SsAgent", "Color": "#AA0000"}])
 
 #server = ModularServer(

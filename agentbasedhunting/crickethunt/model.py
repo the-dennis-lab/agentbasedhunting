@@ -48,31 +48,22 @@ class HuntingGrounds(Model):
         grass_distribution = np.genfromtxt("crickethunt/hex_map.txt")
         for _, x, y in self.grid.coord_iter():
             is_grass = grass_distribution[x, y]
-            grass = GrassAgent((x, y), self, is_grass)
+            grass = GrassAgent(self,(x,y),is_grass)
             self.grid.place_agent(grass, (x, y))
             self.schedule.add(grass)
 
 ################## STOPPED HERE
         # Create agent:
-            x = self.random.randrange(self.width)
-            y = self.random.randrange(self.height)
-            sugar = self.random.randrange(6, 25)
-            metabolism = self.random.randrange(2, 4)
-            vision = self.random.randrange(1, 6)
-            #MouseAgent(self, pos, model, chirp=0, soundscape_value=0):
-            ssa = MouseAgent(self, (x, y))
-            self.grid.place_agent(ssa, (x, y))
-            self.schedule.add(ssa)
+            #ssa = MouseAgent(self)
+            #self.grid.place_agent(ssa, (x, y))
+            #self.schedule.add(ssa)
 
         self.running = True
         self.datacollector.collect(self)
 
     def step(self):
         self.schedule.step()
-        # collect data
         self.datacollector.collect(self)
-        if self.verbose:
-            print([self.schedule.time, self.schedule.get_breed_count(MouseAgent)])
 
     def run_model(self, step_count=200):
 
