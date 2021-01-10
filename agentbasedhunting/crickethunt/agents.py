@@ -69,7 +69,19 @@ class CricketAgent(Agent):
                 for num in np.arange(1,numyhex+1):
                     cricket_chambers.append((xval+xincrement,yval))
                     # TODO fix for DRY above two lines repeated
-        self.pos =
+        self.pos = self.random.choice(cricket_chambers)
+
+
+
+
+
+
+
+
+
+
+
+
 
 """    @property
     def isCooroperating(self):
