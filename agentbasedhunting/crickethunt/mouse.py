@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 from mesa import Agent
 
@@ -63,7 +64,15 @@ class MouseAgent(Agent):
         one = np.array(pos_1)
         two = np.array(pos_2)
         heading = two - one
-        return heading
+        angular_heading = (np.arctan(heading[1]/heading[0]))*(180/(2*math.pi))
+        return angular_heading
+
+    def get_distance(pt1,pt2):
+        x1, y1 = pt1
+        x2, y2 = pt2
+        dx = x1 - x2
+        dy = y1 - y2
+        return math.sqrt(dx ** 2 + dy ** 2)
 
     def get_current_sound_info(self, pos):
         this_cell = self.model.grid.get_cell_list_contents([pos])
@@ -79,19 +88,14 @@ class MouseAgent(Agent):
             and previous heading.
         Compute the new vector and prepare to move.
         """
-
-        # if chirp happened, then there's a sound value
-        for agent in self.model.grid.get_cell_list_contents([pos]):
-            if type(agent) is SoundAgent:
-                soundinfo = agent.soundscape_value
-
-        # does the animal move at all this turn?
-        # TODO weight by confidence in sound location?
+        soundinfo = get_current_sound_info(self,pos)
 
         # if we're less than the Pdwell, dwell, else roam
         if self.random.randint(0,100) < 100*self.Pdwell:
             self.new_pos = self.pos
-        elif soundinfo > 0:
+            # does the animal move at all this turn?
+            # TODO weight by confidence in sound location? time since last pause?
+        elif soundinfo.soundscape_value > 0:
             # is the cricket chirping? if so don't move! then update beliefs
             self.new_pos = self.pos
             self.belief = agent.soundscape_value
@@ -103,20 +107,22 @@ class MouseAgent(Agent):
                     self, pos, moore = True, include_center = False,
                     radius = self.range)
                 if self.value is 0]
-            # self.velocity = coherence, heading, etc. vectors /# vectors
-            #self.velocity /= np.linalg.norm(self.velocity)
+            self.velocity = (self.heading * self.cohere_factor) + (self.belief * (1-self.cohere_factor))*((2*math.pi)/180)
+            # in radians
+            hypotenuse = self.random.randint(3,self.range)
 
+            new_x = self.pos[0] + (np.cos(self.velocity)*hypotenuse)
+            new_y = self.pos[1] + (np.sin(self.velocity)*hypotenuse)
 
-
-            ############ self.new_pos
-
-"""
-        new_pos = self.pos + self.velocity * self.speed
-        self.next_move = new_pos
-
-"""
+            # find closest point in neighborhood that isn't grass
+            min_dist = min([get_distance([new_x,new_y], pos) for pos in candidate_moves])
+            final_candidates = [
+                pos for pos in candidates if get_distance(self.pos, pos) == min_dist
+            ]
+            self.random.shuffle(final_candidates)
+            self.new_pos = final_candidates[0]
 
     def advance(self):
-        self.heading = get_mouse_heading(pos,new_pos)
-        # if next to cricket, eat it (ends sim)
-        self.model.grid.move_agent(self, new_pos)
+        self.heading = get_mouse_heading(self.pos,self.new_pos)
+        # ADD if next to cricket, eat it (ends sim)
+        self.model.grid.move_agent(self, self.new_pos)
