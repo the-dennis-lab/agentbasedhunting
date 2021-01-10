@@ -1,5 +1,4 @@
 import math
-from crickethunt.random_walk import RandomWalker
 from mesa import Agent
 """
 agents need to have step AND advance for simultaneous activation
@@ -21,7 +20,7 @@ another agent for mouse
 """
 
 class SoundAgent(Agent):
-    def __init__(self,pos,model,soundscape_value=0):
+    def __init__(self,pos,model,chirp,soundscape_value=0):
         super().__init__(pos,model)
         self.soundscape_value = soundscape_value
 
@@ -33,6 +32,10 @@ class SoundAgent(Agent):
 
     def advance(self):
         self.soundscape_value=0 #always zero unless cricket is chirping
+
+
+
+
 
 class CricketAgent(Agent):
     def __init__(self, pos, model, chirp=0):
