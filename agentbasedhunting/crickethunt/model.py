@@ -16,7 +16,7 @@ from mesa import Model
 from mesa.space import MultiGrid
 from mesa.datacollection import DataCollector
 
-from .agents import MouseAgent, CricketAgent
+from .agents import MouseAgent, CricketAgent, GrassAgent, SoundAgent
 from .schedule import SimultaneousActivationByBreed
 import numpy as np
 
@@ -45,14 +45,14 @@ class HuntingGrounds(Model):
 
 
         # Create grass patches
-        hex_distribution = np.genfromtxt("crickethunt/hex_map.txt")
+        grass_distribution = np.genfromtxt("crickethunt/hex_map.txt")
         for _, x, y in self.grid.coord_iter():
-# STOPPED HERE
-            max_sugar = hex_distribution[x, y]
-            sugar = CricketAgent((x, y), self, max_sugar)
-            self.grid.place_agent(sugar, (x, y))
-            self.schedule.add(sugar)
+            is_grass = grass_distribution[x, y]
+            grass = GrassAgent((x, y), self, is_grass)
+            self.grid.place_agent(grass, (x, y))
+            self.schedule.add(grass)
 
+################## STOPPED HERE
         # Create agent:
             x = self.random.randrange(self.width)
             y = self.random.randrange(self.height)

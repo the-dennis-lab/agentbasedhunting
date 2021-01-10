@@ -33,9 +33,14 @@ class SoundAgent(Agent):
     def advance(self):
         self.soundscape_value=0 #always zero unless cricket is chirping
 
-
-
-
+class GrassAgent(Agent):
+    def __init__(self,pos,is_grass):
+        super().__init__(pos,model)
+        self.value = is_grass
+    def step(self):
+        0
+    def advance(self):
+        0
 
 class CricketAgent(Agent):
     def __init__(self, pos, model, chirp=0):

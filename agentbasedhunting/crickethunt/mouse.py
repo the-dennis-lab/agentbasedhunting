@@ -80,15 +80,15 @@ class MouseAgent(Agent):
         Compute the new vector and prepare to move.
         """
 
+        # if chirp happened, then there's a sound value
         for agent in self.model.grid.get_cell_list_contents([pos]):
             if type(agent) is SoundAgent:
                 soundinfo = agent.soundscape_value
 
         # does the animal move at all this turn?
         # TODO weight by confidence in sound location?
-            # if we're less than the Pdwell, dwell
-            # else roam
 
+        # if we're less than the Pdwell, dwell, else roam
         if self.random.randint(0,100) < 100*self.Pdwell:
             self.new_pos = self.pos
         elif soundinfo > 0:
@@ -96,47 +96,23 @@ class MouseAgent(Agent):
             self.new_pos = self.pos
             self.belief = agent.soundscape_value
         else: #let's move!
-            neighbor_cells = get_neighborhood(self, pos, moore = True, include_center = False, radius = self.range)
+            # what are my options for moving? (exclude grass for now)
+            candidate_moves = [
+                cell
+                for cell in get_neighborhood(
+                    self, pos, moore = True, include_center = False,
+                    radius = self.range)
+                if self.value is 0]
+            # self.velocity = coherence, heading, etc. vectors /# vectors
+            #self.velocity /= np.linalg.norm(self.velocity)
+
+
 
             ############ self.new_pos
 
 """
-BOID STEP
-    def step(self):
-        neighbors = self.model.space.get_neighbors(self.pos, self.vision, False)
-        self.velocity += (
-            self.cohere(neighbors) * self.cohere_factor
-            + self.separate(neighbors) * self.separate_factor
-            + self.match_heading(neighbors) * self.match_factor
-        ) / 2
-        self.velocity /= np.linalg.norm(self.velocity)
         new_pos = self.pos + self.velocity * self.speed
         self.next_move = new_pos
-
-        def advance(self):
-        self.model.space.move_agent(self, new_pos)
-class GrassPatch(Agent):
-    def __init__(self, unique_id, pos, model, fully_grown, countdown):
-        Creates a new patch of grass
-
-        Args:
-            grown: (boolean) Whether the patch of grass is fully grown or not
-            countdown: Time for the patch of grass to be fully grown again
-
-
-        super().__init__(unique_id, model)
-        self.fully_grown = fully_grown
-        self.countdown = countdown
-        self.pos = pos
-
-    def step(self):
-        if not self.fully_grown:
-            if self.countdown <= 0:
-                # Set as fully grown
-                self.fully_grown = True
-                self.countdown = self.model.grass_regrowth_time
-            else:
-                self.countdown -= 1
 
 """
 
