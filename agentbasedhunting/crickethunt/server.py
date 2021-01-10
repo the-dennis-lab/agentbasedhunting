@@ -26,7 +26,7 @@ def MouseAgent_portrayal(agent):
     elif type(agent) is CricketAgent:
         portrayal["Shape"] = "crickethunt/resources/cricket.png"
         portrayal["Layer"] = 0
-        portrayal["scale"]= 2
+        portrayal["scale"]= 1
 
     return portrayal
 

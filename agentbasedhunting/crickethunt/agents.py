@@ -1,5 +1,5 @@
 import numpy as np
-import math
+import math, random
 
 from mesa import Agent
 from mesa.space import MultiGrid
@@ -20,38 +20,12 @@ def get_distance(pt1,pt2):
         dy = y1 - y2
         return math.sqrt(dx ** 2 + dy ** 2)
 
-def get_new_cricket_pos():
-        # add cricket agent in one of the center circles
-        # starting off based on hex_map made 2021_01_07
-        # TODO later make this flexible?
-        hexnum=6
-        numyhex = hexnum-1
-        xval = 33
-        xincrement = 10
-        yval = 8
-        yincrement = 7
-        cricket_chambers = [tuple((xval,yval))]
-
-        for rowval in np.arange(1,2*(hexnum)):
-            if rowval < 7:
-                yval = yval+(yincrement*(rowval-1))
-                numyhex = numyhex+1
-                for num in np.arange(1,numyhex+1):
-                    cricket_chambers.append((xval+xincrement,yval))
-            else:
-                numyhex = numyhex-1
-                for num in np.arange(1,numyhex+1):
-                    cricket_chambers.append((xval+xincrement,yval))
-                    # TODO fix for DRY above two lines repeated
-        [pt1,pt2] = random.choice(cricket_chambers)
-        return [pt1,pt2]
-
 class CricketAgent(Agent):
     def __init__(self, pos, model, chirp=0):
         super().__init__(pos, model)
         self.countdown = chirp
         self.chirp = chirp
-        self.pos = self.random.choice(cricket_chambers)
+        self.pos = pos
     def step(self):
         if self.countdown > 20:
             self.chirp = 1
@@ -73,12 +47,11 @@ class SoundAgent(Agent):
         self.soundscape_value = soundscape_value
 
     def step(self):
-        cricket = [agent for agent in self.model.grid.get_cell_list_contents(cell)
-                for cell in self.model.grid.get_neighborhood(self,pos,moore=True,include_center=False,radius=115)
+        cricket = [agent for agent in cell for cell in self.model.grid.get_neighborhood(self,pos,moore=True,include_center=False,radius=115)
                 if type(agent) is CricketAgent]
 
         if cricket.chirp == 1:
-            crickit_pos = cricket.pos
+            cricket_pos = cricket.pos
             #get my sound value
             # get distance from cricket
             d = get_distance(self.pos,cricket_pos)
@@ -107,7 +80,7 @@ class MouseAgent(Agent):
     def __init__(
         self,
         model,
-        pos=[0,0],
+        pos,
         speed=0,
         velocity=0,
         belief = [0,0],
@@ -140,7 +113,8 @@ class MouseAgent(Agent):
         # TODO make mouse start flexible
         # for now have the x,y locations for mouse intro points and cricket locations
         # for each initiation of the model, pick from these lists randomly
-        self.pos = self.random.choice([(58,2),(17,21),(17,65),(58,84),(98,65),(98,21)])
+        self.pos = pos
+        self.model=model
         self.speed = speed
         self.velocity = velocity
         self.heading = heading
@@ -167,12 +141,6 @@ class MouseAgent(Agent):
         angular_heading = (np.arctan(heading[1]/heading[0]))*(180/(2*math.pi))
         return angular_heading
 
-    def get_current_sound_info(self, pos):
-        this_cell = self.model.grid.get_cell_list_contents([pos])
-        for agent in this_cell:
-            if type(agent) is SoundAgent:
-                return agent
-
     def step(self):
         """
         Get the mouse's
@@ -181,7 +149,12 @@ class MouseAgent(Agent):
             and previous heading.
         Compute the new vector and prepare to move.
         """
-        soundinfo = get_current_sound_info(self,pos)
+
+##### THIS IS FUCKED
+#        soundagent = [cell
+#            for cell in self.model.grid.get_neighborhood(self,pos,moore=False,include_center=True,radius=0)
+#            if type(agent) is SoundAgent]
+
         # sound info contains the 'believed' pt where cricket is
 
         # if we're less than the Pdwell, dwell, else roam

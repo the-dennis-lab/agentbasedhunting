@@ -52,11 +52,43 @@ class HuntingGrounds(Model):
             self.grid.place_agent(grass, (x, y))
             self.schedule.add(grass)
 
-################## STOPPED HERE
-        # Create agent:
-            #ssa = MouseAgent(self)
-            #self.grid.place_agent(ssa, (x, y))
-            #self.schedule.add(ssa)
+        # Create mouse:
+        pos_mouse = self.random.choice([(2,58),(21,17),(65,17),(84,58),(65,98),(21,98)])
+        mouse = MouseAgent(pos_mouse,self)
+        self.grid.place_agent(mouse, pos_mouse)
+        self.schedule.add(mouse)
+
+
+        # add cricket agent in one of the center circles
+        # starting off based on hex_map made 2021_01_07
+        # TODO later make this flexible?
+        hexnum=6
+        numyhex = hexnum-1
+        xval = 33
+        xincrement = 10
+        yval = 8
+        yincrement = 7
+        cricket_chambers = [tuple((xval,yval))]
+
+        for rowval in np.arange(1,(2*(hexnum))):
+            if rowval < 7:
+                yval = yval+(yincrement*(rowval-1))
+                numyhex = numyhex+1
+                for num in np.arange(1,numyhex+1):
+                    cricket_chambers.append((xval+xincrement,yval))
+            else:
+                numyhex = numyhex-1
+                for num in np.arange(1,numyhex+1):
+                    cricket_chambers.append((xval+xincrement,yval))
+                    # TODO fix for DRY above two lines repeated
+        [x,y] = self.random.choice(cricket_chambers)
+        print([x,y])
+
+        # Create cricket
+        cricket = CricketAgent((x, y), self)
+        self.grid.place_agent(cricket, (x, y))
+        self.schedule.add(cricket)
+
 
         self.running = True
         self.datacollector.collect(self)
