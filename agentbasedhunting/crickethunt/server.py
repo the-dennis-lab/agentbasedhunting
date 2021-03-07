@@ -5,10 +5,8 @@ from .agents import MouseAgent, SoundAgent, CricketAgent, GrassAgent
 from .model import HuntingGrounds
 
 def MouseAgent_portrayal(agent):
-    if agent is None:
-        return
-
-    portrayal = {}
+    assert agent is not None
+    portrayal={}
 
     if type(agent) is GrassAgent and agent.value == 1:
         portrayal["Shape"] = "rect"
@@ -19,14 +17,30 @@ def MouseAgent_portrayal(agent):
         portrayal["Layer"] = 0
 
     if type(agent) is MouseAgent:
-        portrayal["Shape"] = "crickethunt/resources/mouseoutline.png"
-        portrayal["scale"]= 1
+        #portrayal["Shape"] = "crickethunt/resources/mouseoutline.png"
+        portrayal["Shape"] = "rect"
+        portrayal["Filled"] = "true"
+        #portrayal["scale"]= 4
+        portrayal["h"]=1
+        portrayal["w"]=1
+        portrayal["Color"] = "#ff0000"
         portrayal["Layer"] = 0
 
+        portrayal["x"]= agent.pos[0]
+        portrayal["y"]= agent.pos[1]
+
     elif type(agent) is CricketAgent:
-        portrayal["Shape"] = "crickethunt/resources/cricket.png"
+        #portrayal["Shape"] = "crickethunt/resources/cricket.png"
         portrayal["Layer"] = 0
-        portrayal["scale"]= 1
+        #portrayal["scale"]= 1
+        portrayal["Shape"] = "rect"
+        portrayal["Filled"] = "true"
+        portrayal["h"]=1
+        portrayal["w"]=1
+        if agent.chirp==1:
+            portrayal["Color"] = "#000000"
+        else:
+            portrayal["Color"] = "#58CCED"
 
     return portrayal
 

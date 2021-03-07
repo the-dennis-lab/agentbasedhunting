@@ -50,7 +50,9 @@ class SimultaneousActivationByBreed(SimultaneousActivation):
             self.steps += 1
             self.time += 1
         else:
-            super().step()
+            for agent_class in self.agents:
+                self.steps+=1
+                self.time+=1
 
     def step_breed(self, breed):
         """

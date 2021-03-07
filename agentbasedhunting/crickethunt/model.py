@@ -14,16 +14,17 @@ Northwestern University, Evanston, IL.
 
 from mesa import Model
 from mesa.space import MultiGrid
+from mesa.time import SimultaneousActivation
 from mesa.datacollection import DataCollector
 
 from .agents import MouseAgent, CricketAgent, GrassAgent, SoundAgent
-from .schedule import SimultaneousActivationByBreed
+#from .schedule import SimultaneousActivationByBreed
 import numpy as np
 
 
 class HuntingGrounds(Model):
     """
-    HuntingGrounds
+    HuntingGrounds class
     """
 
     verbose = True  # Print-monitoring
@@ -37,7 +38,7 @@ class HuntingGrounds(Model):
         self.height = height
         self.width = width
 
-        self.schedule = SimultaneousActivationByBreed(self)
+        self.schedule = SimultaneousActivation(self)
         self.grid = MultiGrid(self.height, self.width, torus=False)
         self.datacollector = DataCollector(
             {"MouseAgent": lambda m: 1}
@@ -91,26 +92,14 @@ class HuntingGrounds(Model):
 
 
         self.running = True
+        print('collecting data')
         self.datacollector.collect(self)
 
     def step(self):
         self.schedule.step()
         self.datacollector.collect(self)
 
-    def run_model(self, step_count=200):
-
-        if self.verbose:
-            print(
-                "Initial number Sugarscape Agent: ",
-                self.schedule.get_breed_count(MouseAgent),
-            )
-
-        for i in range(step_count):
+    def run(self, n):
+        """ Run the model for n steps. """
+        for _ in range(n):
             self.step()
-
-        if self.verbose:
-            print("")
-            print(
-                "Final number Sugarscape Agent: ",
-                self.schedule.get_breed_count(MouseAgent),
-            )

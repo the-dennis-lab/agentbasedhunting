@@ -13,6 +13,23 @@ need one agent for cricket
 """
 
 
+def get_mouse_heading(self,pos_1,pos_2):
+    """
+    Find the vector from position 1 to position 2
+    """
+    one = np.array(pos_1)
+    two = np.array(pos_2)
+    heading = two - one
+    if np.all([heading] == np.array([0,0])):
+        # if the animal didn't move, see if the agent moves its head
+        if self.random.randint(1,100) > 100*self.Pscan:
+            pos_2 = np.array([pos_1[0]+self.random.randint(-1,1), pos_1[1]+self.random.randint(-1,1)])
+            two = np.array(pos_2)
+            heading = two - one
+    angular_heading = (np.arctan(heading[1]/heading[0]))*(180/(2*math.pi))
+    print('angular heading is {}'.format(angular_heading))
+    return angular_heading
+
 def get_distance(pt1,pt2):
         x1, y1 = pt1
         x2, y2 = pt2
@@ -26,20 +43,28 @@ class CricketAgent(Agent):
         self.countdown = chirp
         self.chirp = chirp
         self.pos = pos
+        self.value=0
+
     def step(self):
+        print('cricketstep')
         if self.countdown > 20:
             self.chirp = 1
+            self.countdown=0
+        else:
+            self.chirp=0
 
     def advance(self):
+        # TODO add mouse dependency:
         # did the mouse move?
-        mouse_movement = [cell
-            for cell in self.model.grid.get_neighborhood(self,pos,moore=True,include_center=False,radius=115)
-                if type(agent) is MouseAgent]
-        if mouse_movement.speed > 1:
+        #mouse_movement = [cell
+        #    for neighbor in self.model.grid.get_neighborhood(self.pos,moore=True,include_center=False,radius=115)
+        #        if neighbor.type is MouseAgent]
+        #if mouse_movement.speed > 1:
             #if mouse moved, reset counter
-            self.countdown = 0
-        else:
-            self.countdown += 1
+        #    self.countdown = 0
+        #else:
+        #    self.countdown += 1
+        self.countdown+=1
 
 class SoundAgent(Agent):
     def __init__(self,pos,model,soundscape_value=0):
@@ -47,7 +72,7 @@ class SoundAgent(Agent):
         self.soundscape_value = soundscape_value
 
     def step(self):
-        cricket = [agent for agent in cell for cell in self.model.grid.get_neighborhood(self,pos,moore=True,include_center=False,radius=115)
+        cricket = [agent for agent in cell for cell in self.model.grid.get_neighborhood(self.pos,moore=True,include_center=False,radius=115)
                 if type(agent) is CricketAgent]
 
         if cricket.chirp == 1:
@@ -62,6 +87,7 @@ class SoundAgent(Agent):
             if d < 50:
                 soundscape_value = [self.pos[0]+self.random.randint(-25,25),self.pos[1]+ self.random.randint(-25,25)]
         else: soundscape_value=0
+
     def advance(self):
         self.soundscape_value=0 #always resets to zero
 
@@ -79,17 +105,18 @@ class GrassAgent(Agent):
 class MouseAgent(Agent):
     def __init__(
         self,
-        model,
         pos,
-        speed=0,
+        model,
+        speed=2,
         velocity=0,
         belief = [0,0],
         range = 30,
         heading=0,
-        Pdwell = 0.95,
+        Pdwell = 0.01,
         Pscan = 0,
         Lbias= 0.5,
-        cohere= 0.5
+        cohere= 0.5,
+        value=0
     ):
         """
         Create a new mouse agent.
@@ -109,12 +136,13 @@ class MouseAgent(Agent):
             cohere: the relative importance of maintaining last direction
 
         """
-        super().__init__(self, model)
+        super().__init__(pos, model)
         # TODO make mouse start flexible
         # for now have the x,y locations for mouse intro points and cricket locations
         # for each initiation of the model, pick from these lists randomly
         self.pos = pos
-        self.model=model
+        self.model= model
+        self.value=0
         self.speed = speed
         self.velocity = velocity
         self.heading = heading
@@ -124,22 +152,7 @@ class MouseAgent(Agent):
         self.Pscan = Pscan
         self.Lbias = Lbias
         self.cohere_factor = cohere
-
-    def get_mouse_heading(self,pos1,pos2):
-        """
-        Find the vector from position 1 to position 2
-        """
-        one = np.array(pos_1)
-        two = np.array(pos_2)
-        heading = two - one
-        if np.all([heading] == np.array([0,0])):
-            # if the animal didn't move, see if the agent moves its head
-            if self.random.randint(1,100) > 100*Pscan:
-                pos_2 = np.array([pos_1[0]+self.random.randint(-1,1), pos_1[1]+self.random.randint(-1,1)])
-                two = np.array(pos_2)
-                heading = two - one
-        angular_heading = (np.arctan(heading[1]/heading[0]))*(180/(2*math.pi))
-        return angular_heading
+        print('mouse init')
 
     def step(self):
         """
@@ -149,47 +162,54 @@ class MouseAgent(Agent):
             and previous heading.
         Compute the new vector and prepare to move.
         """
-
-##### THIS IS FUCKED
-#        soundagent = [cell
-#            for cell in self.model.grid.get_neighborhood(self,pos,moore=False,include_center=True,radius=0)
-#            if type(agent) is SoundAgent]
-
         # sound info contains the 'believed' pt where cricket is
-
         # if we're less than the Pdwell, dwell, else roam
-        if self.random.randint(0,100) < 100*self.Pdwell:
+
+        if random.randint(0,100) < 100*self.Pdwell:
             self.new_pos = self.pos
             # does the animal move at all this turn?
             # TODO weight by confidence in sound location? time since last pause?
-        elif np.all(soundinfo.soundscape_value > 0):
+        # TODO ADD CHIRPING LATER
+        #elif np.all(soundinfo.soundscape_value > 0):
             # is the cricket chirping? if so don't move! then update beliefs
-            self.new_pos = self.pos
-            self.belief = agent.soundscape_value
+        #    self.new_pos = self.pos
+        #    self.belief = agent.soundscape_value
         else: #let's move!
             # what are my options for moving? (exclude grass for now)
             candidate_moves = [
-                cell
-                for cell in get_neighborhood(
-                    self, pos, moore = True, include_center = False,
+                cell for cell in self.model.grid.get_neighborhood(
+                    self.pos, True, include_center = False,
                     radius = self.range)
+
                 if self.value is 0]
-            self.velocity = (self.heading * self.cohere_factor) + (self.belief * (1-self.cohere_factor))*((2*math.pi)/180)
+
+            current_belief = get_mouse_heading(self,self.pos,self.belief)
+            self.velocity = (self.heading * self.cohere_factor) + (current_belief * (1-self.cohere_factor))*((2*math.pi)/180)
             # in radians
             self.speed = self.random.randint(3,self.range)
+            print('self speed is {}'.format(self.speed))
 
-            new_x = self.pos[0] + (np.cos(self.velocity)*self.speed)
-            new_y = self.pos[1] + (np.sin(self.velocity)*self.speed)
+            new_x = int(self.pos[0] + (np.cos(self.velocity)*self.speed))
+            new_y = int(self.pos[1] + (np.sin(self.velocity)*self.speed))
+            print('new x is {} and new y is {}'.format(new_x,new_y))
 
             # find closest point in neighborhood that isn't grass
-            min_dist = min([get_distance([new_x,new_y], pos) for pos in candidate_moves])
-            final_candidates = [
-                pos for pos in candidates if get_distance(self.pos, pos) == min_dist
-            ]
-            self.random.shuffle(final_candidates)
-            self.new_pos = final_candidates[0]
+            min_dist = int(min([get_distance([new_x,new_y], pos) for pos in candidate_moves]))
+            print('min dist is {}'.format(min_dist))
+            if min_dist == 0:
+                self.new_pos = (new_x,new_y)
+                print('new_pos was not grass, using new_pos')
+            else:
+                final_candidates = [
+                    pos for pos in candidate_moves if int(get_distance(self.pos, pos)) == min_dist
+                ]
+                print('final cand are {}'.format(final_candidates))
+                self.random.shuffle(final_candidates)
+                self.new_pos = final_candidates[0]
+                print('new position should be {} selected from {}'.format(self.new_pos,final_candidates))
 
     def advance(self):
-        self.heading = get_mouse_heading(self.pos,self.new_pos)
+        self.heading = get_mouse_heading(self,self.pos,self.new_pos)
         # ADD if next to cricket, eat it (ends sim)
         self.model.grid.move_agent(self, self.new_pos)
+        print('does advance happen')
