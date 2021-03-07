@@ -13,7 +13,7 @@ def MouseAgent_portrayal(agent):
         portrayal["Filled"] = "true"
         portrayal["w"] = 1
         portrayal["h"] = 1
-        portrayal["Color"] = "#009205"
+        portrayal["Color"] = "#DAFFBD"
         portrayal["Layer"] = 0
 
     if type(agent) is MouseAgent:
@@ -23,22 +23,22 @@ def MouseAgent_portrayal(agent):
         #portrayal["scale"]= 4
         portrayal["h"]=1
         portrayal["w"]=1
-        portrayal["Color"] = "#ff0000"
-        portrayal["Layer"] = 0
+        portrayal["Color"] = "#000000"
+        portrayal["Layer"] = 1
 
         portrayal["x"]= agent.pos[0]
         portrayal["y"]= agent.pos[1]
 
     elif type(agent) is CricketAgent:
         #portrayal["Shape"] = "crickethunt/resources/cricket.png"
-        portrayal["Layer"] = 0
+        portrayal["Layer"] = 1
         #portrayal["scale"]= 1
         portrayal["Shape"] = "rect"
         portrayal["Filled"] = "true"
         portrayal["h"]=1
         portrayal["w"]=1
         if agent.chirp==1:
-            portrayal["Color"] = "#000000"
+            portrayal["Color"] = "#ff0000"
         else:
             portrayal["Color"] = "#58CCED"
 
