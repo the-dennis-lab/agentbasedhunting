@@ -13,7 +13,7 @@ def MouseAgent_portrayal(agent):
         portrayal["Filled"] = "true"
         portrayal["w"] = 1
         portrayal["h"] = 1
-        portrayal["Color"] = "#DAFFBD"
+        portrayal["Color"] = "#A7D670"
         portrayal["Layer"] = 0
 
     if type(agent) is MouseAgent:
@@ -35,12 +35,12 @@ def MouseAgent_portrayal(agent):
         #portrayal["scale"]= 1
         portrayal["Shape"] = "rect"
         portrayal["Filled"] = "true"
-        portrayal["h"]=1
-        portrayal["w"]=1
+        portrayal["h"]=2
+        portrayal["w"]=2
         if agent.chirp==1:
             portrayal["Color"] = "#ff0000"
         else:
-            portrayal["Color"] = "#58CCED"
+            portrayal["Color"] = "#00A757"
 
     return portrayal
 

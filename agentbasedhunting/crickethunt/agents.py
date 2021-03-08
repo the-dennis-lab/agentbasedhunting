@@ -27,6 +27,8 @@ def get_mouse_heading(self,pos_1,pos_2):
             two = np.array(pos_2)
             heading = two - one
     angular_heading = (np.arctan(heading[1]/heading[0]))*(180/(2*math.pi))
+    if math.isnan(angular_heading):
+        angular_heading=0
     print('angular heading is {}'.format(angular_heading))
     return angular_heading
 
@@ -45,6 +47,8 @@ class CricketAgent(Agent):
         self.pos = pos
         self.value=0
 
+        #TODO add time between chirps as a user variable
+        #TODO add delay after mouse movement as a user variable
     def step(self):
         print('cricketstep')
         if self.countdown > 20:
@@ -54,16 +58,14 @@ class CricketAgent(Agent):
             self.chirp=0
 
     def advance(self):
-        # TODO add mouse dependency:
-        # did the mouse move?
-        #mouse_movement = [cell
-        #    for neighbor in self.model.grid.get_neighborhood(self.pos,moore=True,include_center=False,radius=115)
-        #        if neighbor.type is MouseAgent]
-        #if mouse_movement.speed > 1:
-            #if mouse moved, reset counter
-        #    self.countdown = 0
-        #else:
-        #    self.countdown += 1
+        neighbors = [i for i in self.model.grid.get_neighborhood(
+            self.pos, True, False, radius = 115) if len(self.model.grid.get_cell_list_contents([i]))>1]
+        mouse_cell = self.model.grid.get_cell_list_contents(neighbors)
+        for agent in mouse_cell:
+            if type(agent) is MouseAgent:
+                if agent.speed > 2:
+                    self.countdown = 0
+                    print('resetting cricket countdown')
         self.countdown+=1
 
 class SoundAgent(Agent):
@@ -110,10 +112,10 @@ class MouseAgent(Agent):
         speed=2,
         velocity=0,
         belief = [0,0],
-        range = 30,
+        range = 10,
         heading=0,
-        Pdwell = 0.01,
-        Pscan = 0,
+        Pdwell = 0.5,
+        Pscan = 0.1,
         Lbias= 0.5,
         cohere= 0.5,
         value=0
@@ -169,36 +171,41 @@ class MouseAgent(Agent):
             self.new_pos = self.pos
             # does the animal move at all this turn?
             # TODO weight by confidence in sound location? time since last pause?
-        # TODO ADD CHIRPING LATER
         #elif np.all(soundinfo.soundscape_value > 0):
             # is the cricket chirping? if so don't move! then update beliefs
         #    self.new_pos = self.pos
         #    self.belief = agent.soundscape_value
         else: #let's move!
-            # what are my options for moving? (exclude grass for now)
-            candidate_moves = [
-                cell for cell in self.model.grid.get_neighborhood(
-                    self.pos, True, include_center = False,
-                    radius = self.range)
-
-                if self.value is 0]
-
+            # where do I think this cricket is?
             current_belief = get_mouse_heading(self,self.pos,self.belief)
+            print('current belief is {} and heading is {}'.format(self.belief,self.heading))
             self.velocity = (self.heading * self.cohere_factor) + (current_belief * (1-self.cohere_factor))*((2*math.pi)/180)
             # in radians
             self.speed = self.random.randint(3,self.range)
-            print('self speed is {}'.format(self.speed))
+            print('self speed is {} and velocity is {} and self.pos are {}'.format(self.speed,self.velocity, self.pos))
 
             new_x = int(self.pos[0] + (np.cos(self.velocity)*self.speed))
             new_y = int(self.pos[1] + (np.sin(self.velocity)*self.speed))
             print('new x is {} and new y is {}'.format(new_x,new_y))
 
+            # what are my options for moving?
+            candidate_cells = [
+                cell for cell in self.model.grid.get_neighborhood(
+                    self.pos, True, False,
+                    radius = self.speed)]
+            # exclude grass
+            candidate_moves = []
+            for cell in candidate_cells:
+                cell_info = self.model.grid.get_cell_list_contents(cell)
+                for agent in cell_info:
+                    if type(agent) is GrassAgent and agent.value == 0:
+                        candidate_moves.append(cell)
+
             # find closest point in neighborhood that isn't grass
             min_dist = int(min([get_distance([new_x,new_y], pos) for pos in candidate_moves]))
-            print('min dist is {}'.format(min_dist))
+
             if min_dist == 0:
                 self.new_pos = (new_x,new_y)
-                print('new_pos was not grass, using new_pos')
             else:
                 final_candidates = [
                     pos for pos in candidate_moves if int(get_distance(self.pos, pos)) == min_dist
@@ -212,4 +219,3 @@ class MouseAgent(Agent):
         self.heading = get_mouse_heading(self,self.pos,self.new_pos)
         # ADD if next to cricket, eat it (ends sim)
         self.model.grid.move_agent(self, self.new_pos)
-        print('does advance happen')

@@ -63,25 +63,31 @@ class HuntingGrounds(Model):
         # add cricket agent in one of the center circles
         # starting off based on hex_map made 2021_01_07
         # TODO later make this flexible?
-        hexnum=6
-        numyhex = hexnum-1
-        xval = 33
-        xincrement = 10
-        yval = 8
-        yincrement = 7
-        cricket_chambers = [tuple((xval,yval))]
+        side_length=6 #num of hexes along each side
+        num_y_hex = (2*side_length)-1
+        middle_x_val = 35
+        x_increment = 14
+        middle_y_val = 52
+        y_increment = 10
+        cricket_chambers = []
 
-        for rowval in np.arange(1,(2*(hexnum))):
-            if rowval < 7:
-                yval = yval+(yincrement*(rowval-1))
-                numyhex = numyhex+1
-                for num in np.arange(1,numyhex+1):
-                    cricket_chambers.append((xval+xincrement,yval))
-            else:
-                numyhex = numyhex-1
-                for num in np.arange(1,numyhex+1):
-                    cricket_chambers.append((xval+xincrement,yval))
-                    # TODO fix for DRY above two lines repeated
+        rel_cols = int(side_length/2)-1
+        for col_val in np.arange(-rel_cols,rel_cols):
+            if col_val % 2: # if not even
+                col_offset = int(x_increment/2)*(-col_val/abs(col_val))
+                row_offset = int(y_increment/2)*(-col_val/abs(col_val))
+            else: #if even
+                col_offset = 0
+                row_offset = 0
+
+            rel_col_height = side_length - 1 - abs(col_val)
+
+            for i in np.arange(-rel_col_height,rel_col_height):
+                x_val = int(middle_x_val + (col_val*x_increment) + col_offset)
+                y_val = int(middle_y_val + (col_val*y_increment) + row_offset)
+                cricket_chambers.append((x_val,y_val))
+        print('all cricket chambers {}'.format(cricket_chambers))
+
         [x,y] = self.random.choice(cricket_chambers)
         print([x,y])
 
