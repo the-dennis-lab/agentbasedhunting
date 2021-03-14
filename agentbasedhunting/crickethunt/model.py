@@ -50,7 +50,15 @@ class HuntingGrounds(Model):
         # Set parameters
         self.height = height
         self.width = width
-
+        self.mouse_dwell_probability = mouse_dwell_probability
+        self.mouse_speed = mouse_speed
+        self.mouse_velocity = mouse_velocity
+        self.mouse_range = mouse_range
+        self.mouse_scan_probability = mouse_scan_probability
+        self.mouse_left_bias = mouse_left_bias
+        self.cricket_delay = cricket_delay
+        self.cricket_range = cricket_range
+        self.cricket_sensitivity = cricket_sensitivity
         self.schedule = SimultaneousActivation(self)
         self.grid = MultiGrid(self.height, self.width, torus=False)
         self.datacollector = DataCollector(

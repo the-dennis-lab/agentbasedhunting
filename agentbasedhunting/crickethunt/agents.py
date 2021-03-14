@@ -21,7 +21,7 @@ def get_mouse_heading(self,pos_1,pos_2):
     heading = two - one
     if np.all([heading] == np.array([0,0])):
         # if the animal didn't move, see if the agent moves its head
-        if self.random.randint(1,100) > 100*self.Pscan:
+        if self.random.randint(1,100) < 100*self.Pscan:
             pos_2 = np.array([pos_1[0]+self.random.randint(-1,1), pos_1[1]+self.random.randint(-1,1)])
             two = np.array(pos_2)
             heading = two - one
@@ -46,10 +46,8 @@ class CricketAgent(Agent):
         self.pos = pos
         self.value=0
 
-        #TODO add time between chirps as a user variable
-        #TODO add delay after mouse movement as a user variable
     def step(self):
-        if self.countdown > 2:
+        if self.countdown > self.model.cricket_delay:
             self.chirp = 1
             self.countdown=0
         else:
@@ -57,11 +55,11 @@ class CricketAgent(Agent):
 
     def advance(self):
         neighbors = [i for i in self.model.grid.get_neighborhood(
-            self.pos, True, False, radius = 115) if len(self.model.grid.get_cell_list_contents([i]))>1]
+            self.pos, True, False, radius = self.model.cricket_range) if len(self.model.grid.get_cell_list_contents([i]))>1]
         mouse_cell = self.model.grid.get_cell_list_contents(neighbors)
         for agent in mouse_cell:
             if type(agent) is MouseAgent:
-                if agent.speed > 2:
+                if agent.speed > self.model.cricket_sensitivity:
                     self.countdown = 0
         self.countdown+=1
 
