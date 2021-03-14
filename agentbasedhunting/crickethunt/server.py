@@ -49,13 +49,40 @@ canvas_element = CanvasGrid(MouseAgent_portrayal, 85, 115, 500, 500)
 
 model_params = {
     "mouse_dwell_probability": UserSettableParameter(
-        "slider", "Mouse Dwell Probability", 0, 0.1, 1
-    )
+        "slider", "Mouse Dwell Probability", 0.5, 0, 1,0.05
+    ),
+    "mouse_speed": UserSettableParameter(
+        "slider", "Mouse Speed", 3, 0, 100, 1
+    ),
+    "mouse_velocity": UserSettableParameter(
+        "slider", "Mouse Velocity", 0.5, 0, 1,0.05
+    ),
+    "mouse_range": UserSettableParameter(
+        "slider", "Mouse Range", 10, 0, 100, 1
+    ),
+    "mouse_scan_probability": UserSettableParameter(
+        "slider", "Mouse Scan Probability", 0, 0, 1, 0.05
+    ),
+    "mouse_coherence": UserSettableParameter(
+        "slider", "Mouse Direction Coherence", 0.5, 0, 1, 0.05
+    ),
+    "mouse_left_bias": UserSettableParameter(
+        "slider", "Mouse Left Bias", 0.5, 0, 1,0.05
+    ),
+    "cricket_delay": UserSettableParameter(
+        "slider", "Cricket Delay After Mouse Movement", 2, 0, 20, 1
+    ),
+    "cricket_range": UserSettableParameter(
+        "slider", "Cricket Range of Movement Sensitivity", 119, 0, 120 , 1
+    ),
+    "cricket_sensitivity": UserSettableParameter(
+        "slider", "How far does the mouse move before cricket stops chirping?", 2, 0, 119,1
+    ),
 }
 
 #chart_element = ChartModule([{"Label": "SsAgent", "Color": "#AA0000"}])
 
 server = ModularServer(
-    HuntingGrounds, [canvas_element], "Hunting Simulation"
+    HuntingGrounds, [canvas_element], "Hunting Simulation", model_params
 )
 # server.launch()

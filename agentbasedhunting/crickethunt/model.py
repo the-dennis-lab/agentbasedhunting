@@ -29,7 +29,20 @@ class HuntingGrounds(Model):
 
     verbose = True  # Print-monitoring
 
-    def __init__(self, height=85, width=115):
+    def __init__(self,
+        height=85,
+        width=115,
+        mouse_dwell_probability=0.5,
+        mouse_speed=3,
+        mouse_velocity=0.5,
+        mouse_range=10,
+        mouse_scan_probability=0,
+        mouse_coherence=0.5,
+        mouse_left_bias=0.5,
+        cricket_delay=2,
+        cricket_range=119,
+        cricket_sensitivity=2
+        ):
         """
         Create a new model with the given parameters.
         """
@@ -86,10 +99,8 @@ class HuntingGrounds(Model):
                 x_val = int(middle_x_val + (col_val*x_increment) + col_offset)
                 y_val = int(middle_y_val + (col_val*y_increment) + row_offset)
                 cricket_chambers.append((x_val,y_val))
-        print('all cricket chambers {}'.format(cricket_chambers))
 
         [x,y] = self.random.choice(cricket_chambers)
-        print([x,y])
 
         # Create cricket
         cricket = CricketAgent((x, y), self)
@@ -98,7 +109,6 @@ class HuntingGrounds(Model):
 
 
         self.running = True
-        print('collecting data')
         self.datacollector.collect(self)
 
     def step(self):

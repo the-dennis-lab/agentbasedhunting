@@ -25,9 +25,10 @@ def get_mouse_heading(self,pos_1,pos_2):
             pos_2 = np.array([pos_1[0]+self.random.randint(-1,1), pos_1[1]+self.random.randint(-1,1)])
             two = np.array(pos_2)
             heading = two - one
-    angular_heading = (np.arctan(heading[1]/heading[0]))*(180/(2*math.pi))
-    if math.isnan(angular_heading):
+    if heading[0]==0:
         angular_heading=0
+    else:
+        angular_heading = (np.arctan(heading[1]/heading[0]))*(180/(2*math.pi))
     return angular_heading
 
 def get_distance(pt1,pt2):
@@ -62,7 +63,6 @@ class CricketAgent(Agent):
             if type(agent) is MouseAgent:
                 if agent.speed > 2:
                     self.countdown = 0
-                    print('resetting cricket countdown')
         self.countdown+=1
 
 class SoundAgent(Agent):
