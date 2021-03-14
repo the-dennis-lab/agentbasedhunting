@@ -3,7 +3,6 @@ import math, random
 
 from mesa import Agent
 from mesa.space import MultiGrid
-
 """
 agents need to have step AND advance for simultaneous activation
 need one agent for cricket
@@ -29,7 +28,6 @@ def get_mouse_heading(self,pos_1,pos_2):
     angular_heading = (np.arctan(heading[1]/heading[0]))*(180/(2*math.pi))
     if math.isnan(angular_heading):
         angular_heading=0
-    print('angular heading is {}'.format(angular_heading))
     return angular_heading
 
 def get_distance(pt1,pt2):
@@ -50,8 +48,7 @@ class CricketAgent(Agent):
         #TODO add time between chirps as a user variable
         #TODO add delay after mouse movement as a user variable
     def step(self):
-        print('cricketstep')
-        if self.countdown > 20:
+        if self.countdown > 2:
             self.chirp = 1
             self.countdown=0
         else:
@@ -103,7 +100,6 @@ class GrassAgent(Agent):
     def advance(self):
         0
 
-
 class MouseAgent(Agent):
     def __init__(
         self,
@@ -114,11 +110,12 @@ class MouseAgent(Agent):
         belief = [0,0],
         range = 10,
         heading=0,
-        Pdwell = 0.5,
+        dwell = 0.5,
         Pscan = 0.1,
         Lbias= 0.5,
-        cohere= 0.5,
-        value=0
+        cohere= 1.0,
+        value=0,
+        stickiness = 0.5
     ):
         """
         Create a new mouse agent.
@@ -150,11 +147,11 @@ class MouseAgent(Agent):
         self.heading = heading
         self.belief = belief
         self.range = range
-        self.Pdwell = Pdwell
+        self.Pdwell = dwell
         self.Pscan = Pscan
         self.Lbias = Lbias
         self.cohere_factor = cohere
-        print('mouse init')
+        self.state_stickiness = stickiness
 
     def step(self):
         """
@@ -166,9 +163,15 @@ class MouseAgent(Agent):
         """
         # sound info contains the 'believed' pt where cricket is
         # if we're less than the Pdwell, dwell, else roam
-
-        if random.randint(0,100) < 100*self.Pdwell:
+        if self.speed == 0:
+            # were paused, how likely are we to continue to pause?
+            dwell = self.Pdwell*(1+self.state_stickiness)
+        else:
+            dwell=self.Pdwell
+        x=random.randint(0,100)
+        if  x < 100*dwell:
             self.new_pos = self.pos
+            self.speed = 0
             # does the animal move at all this turn?
             # TODO weight by confidence in sound location? time since last pause?
         #elif np.all(soundinfo.soundscape_value > 0):
@@ -177,16 +180,17 @@ class MouseAgent(Agent):
         #    self.belief = agent.soundscape_value
         else: #let's move!
             # where do I think this cricket is?
+            if self.speed == 0:
+                cohere_factor = 0
+            else:
+                cohere_factor = self.cohere_factor
             current_belief = get_mouse_heading(self,self.pos,self.belief)
-            print('current belief is {} and heading is {}'.format(self.belief,self.heading))
-            self.velocity = (self.heading * self.cohere_factor) + (current_belief * (1-self.cohere_factor))*((2*math.pi)/180)
+            self.velocity = (self.heading * cohere_factor) + (current_belief * (1-cohere_factor))*((2*math.pi)/180)
             # in radians
             self.speed = self.random.randint(3,self.range)
-            print('self speed is {} and velocity is {} and self.pos are {}'.format(self.speed,self.velocity, self.pos))
 
             new_x = int(self.pos[0] + (np.cos(self.velocity)*self.speed))
             new_y = int(self.pos[1] + (np.sin(self.velocity)*self.speed))
-            print('new x is {} and new y is {}'.format(new_x,new_y))
 
             # what are my options for moving?
             candidate_cells = [
@@ -210,10 +214,8 @@ class MouseAgent(Agent):
                 final_candidates = [
                     pos for pos in candidate_moves if int(get_distance(self.pos, pos)) == min_dist
                 ]
-                print('final cand are {}'.format(final_candidates))
                 self.random.shuffle(final_candidates)
                 self.new_pos = final_candidates[0]
-                print('new position should be {} selected from {}'.format(self.new_pos,final_candidates))
 
     def advance(self):
         self.heading = get_mouse_heading(self,self.pos,self.new_pos)

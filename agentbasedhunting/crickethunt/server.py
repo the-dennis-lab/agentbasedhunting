@@ -1,4 +1,5 @@
 from mesa.visualization.ModularVisualization import ModularServer
+from mesa.visualization.UserParam import UserSettableParameter
 from mesa.visualization.modules import CanvasGrid, ChartModule
 
 from .agents import MouseAgent, SoundAgent, CricketAgent, GrassAgent
@@ -46,11 +47,13 @@ def MouseAgent_portrayal(agent):
 
 canvas_element = CanvasGrid(MouseAgent_portrayal, 85, 115, 500, 500)
 
-#chart_element = ChartModule([{"Label": "SsAgent", "Color": "#AA0000"}])
+model_params = {
+    "mouse_dwell_probability": UserSettableParameter(
+        "slider", "Mouse Dwell Probability", 0, 0.1, 1
+    )
+}
 
-#server = ModularServer(
-#    HuntingGrounds, [canvas_element, chart_element], "Hunting Simulation"
-#)
+#chart_element = ChartModule([{"Label": "SsAgent", "Color": "#AA0000"}])
 
 server = ModularServer(
     HuntingGrounds, [canvas_element], "Hunting Simulation"
