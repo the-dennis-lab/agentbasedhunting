@@ -17,7 +17,7 @@ from mesa.space import MultiGrid
 from mesa.time import SimultaneousActivation
 from mesa.datacollection import DataCollector
 
-from .agents import MouseAgent, CricketAgent, GrassAgent, SoundAgent
+from .agents import MouseAgent, CricketAgent, GrassAgent
 #from .schedule import SimultaneousActivationByBreed
 import numpy as np
 
@@ -39,6 +39,10 @@ class HuntingGrounds(Model):
         mouse_scan_probability=0,
         mouse_coherence=0.5,
         mouse_left_bias=0.5,
+        mouse_hearing_range = 100,
+        mouse_perf_hearing_range = 20,
+        mouse_accuracy_far = 25,
+        mouse_behavior_stickiness = 0.5,
         cricket_delay=2,
         cricket_range=119,
         cricket_sensitivity=2
@@ -56,6 +60,10 @@ class HuntingGrounds(Model):
         self.mouse_range = mouse_range
         self.mouse_scan_probability = mouse_scan_probability
         self.mouse_left_bias = mouse_left_bias
+        self.mouse_hearing_range = mouse_hearing_range,
+        self.mouse_perf_hearing_range = mouse_perf_hearing_range,
+        self.mouse_accuracy_far = mouse_accuracy_far,
+        self.mouse_behavior_stickiness = mouse_behavior_stickiness,
         self.cricket_delay = cricket_delay
         self.cricket_range = cricket_range
         self.cricket_sensitivity = cricket_sensitivity
@@ -109,12 +117,11 @@ class HuntingGrounds(Model):
                 cricket_chambers.append((x_val,y_val))
 
         [x,y] = self.random.choice(cricket_chambers)
-
+        print([x,y])
         # Create cricket
         cricket = CricketAgent((x, y), self)
         self.grid.place_agent(cricket, (x, y))
         self.schedule.add(cricket)
-
 
         self.running = True
         self.datacollector.collect(self)

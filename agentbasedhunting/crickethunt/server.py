@@ -2,7 +2,7 @@ from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.UserParam import UserSettableParameter
 from mesa.visualization.modules import CanvasGrid, ChartModule
 
-from .agents import MouseAgent, SoundAgent, CricketAgent, GrassAgent
+from .agents import MouseAgent, CricketAgent, GrassAgent
 from .model import HuntingGrounds
 
 def MouseAgent_portrayal(agent):
@@ -17,7 +17,21 @@ def MouseAgent_portrayal(agent):
         portrayal["Color"] = "#A7D670"
         portrayal["Layer"] = 0
 
-    if type(agent) is MouseAgent:
+    elif type(agent) is CricketAgent:
+        #portrayal["Shape"] = "crickethunt/resources/cricket.png"
+        portrayal["Layer"] = 1
+        portrayal["Shape"] = "rect"
+        portrayal["Filled"] = "true"
+        portrayal["x"]= agent.pos[0]
+        portrayal["y"]= agent.pos[1]
+        portrayal["h"]=2
+        portrayal["w"]=2
+        if agent.chirp==1:
+            portrayal["Color"] = "#ff0000"
+        else:
+            portrayal["Color"] = "#00A757"
+
+    elif type(agent) is MouseAgent:
         #portrayal["Shape"] = "crickethunt/resources/mouseoutline.png"
         portrayal["Shape"] = "rect"
         portrayal["Filled"] = "true"
@@ -29,19 +43,6 @@ def MouseAgent_portrayal(agent):
 
         portrayal["x"]= agent.pos[0]
         portrayal["y"]= agent.pos[1]
-
-    elif type(agent) is CricketAgent:
-        #portrayal["Shape"] = "crickethunt/resources/cricket.png"
-        portrayal["Layer"] = 1
-        #portrayal["scale"]= 1
-        portrayal["Shape"] = "rect"
-        portrayal["Filled"] = "true"
-        portrayal["h"]=2
-        portrayal["w"]=2
-        if agent.chirp==1:
-            portrayal["Color"] = "#ff0000"
-        else:
-            portrayal["Color"] = "#00A757"
 
     return portrayal
 
@@ -61,22 +62,34 @@ model_params = {
         "slider", "Mouse Range", 10, 0, 100, 1
     ),
     "mouse_scan_probability": UserSettableParameter(
-        "slider", "Mouse Scan Probability", 0, 0, 1, 0.05
+        "slider", "Mouse scan probability (if I'm paused, will I move my head?)", 0, 0, 1, 0.05
     ),
     "mouse_coherence": UserSettableParameter(
-        "slider", "Mouse Direction Coherence", 0.5, 0, 1, 0.05
+        "slider", "Mouse direction coherence (how straight are trajectories)", 0.5, 0, 1, 0.05
     ),
     "mouse_left_bias": UserSettableParameter(
-        "slider", "Mouse Left Bias", 0.5, 0, 1,0.05
+        "slider", "Mouse left bias", 0.5, 0, 1,0.05
+    ),
+    "mouse_hearing_range": UserSettableParameter(
+        "slider", "Mouse hearing range", 100,0,101,1
+    ),
+    "mouse_perf_hearing_range": UserSettableParameter(
+        "slider", "Range were can mouse perfectly localize a sound", 10, 0, 101,1
+    ),
+    "mouse_accuracy_far": UserSettableParameter(
+        "slider", "Lowest hearing accuracy in deviant angles", 45, 0, 99, 1
+    ),
+    "mouse_behavior_stickiness": UserSettableParameter(
+        "slider", "Likelihood of mouse staying in current state (paused or moving)", 1, 0, 99,1
     ),
     "cricket_delay": UserSettableParameter(
-        "slider", "Cricket Delay After Mouse Movement", 2, 0, 20, 1
+        "slider", "Cricket delay after mouse movement", 2, 0, 20, 1
     ),
     "cricket_range": UserSettableParameter(
-        "slider", "Cricket Range of Movement Sensitivity", 119, 0, 120 , 1
+        "slider", "Cricket range where mouse movement influences behavior", 119, 0, 120 , 1
     ),
     "cricket_sensitivity": UserSettableParameter(
-        "slider", "How far does the mouse move before cricket stops chirping?", 2, 0, 119,1
+        "slider", "How far does the mouse have to move before cricket notices?", 2, 0, 119,1
     ),
 }
 

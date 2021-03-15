@@ -63,32 +63,6 @@ class CricketAgent(Agent):
                     self.countdown = 0
         self.countdown+=1
 
-class SoundAgent(Agent):
-    def __init__(self,pos,model,soundscape_value=0):
-        super().__init__(pos,model)
-        self.soundscape_value = soundscape_value
-
-    def step(self):
-        cricket = [agent for agent in cell for cell in self.model.grid.get_neighborhood(self.pos,moore=True,include_center=False,radius=115)
-                if type(agent) is CricketAgent]
-
-        if cricket.chirp == 1:
-            cricket_pos = cricket.pos
-            #get my sound value
-            # get distance from cricket
-            d = get_distance(self.pos,cricket_pos)
-            if d < 10:
-                soundscape_value = self.pos
-            if d < 30:
-                soundscape_value = [self.pos[0]+self.random.randint(-15,15),self.pos[1]+ self.random.randint(-15,15)]
-            if d < 50:
-                soundscape_value = [self.pos[0]+self.random.randint(-25,25),self.pos[1]+ self.random.randint(-25,25)]
-        else: soundscape_value=0
-
-    def advance(self):
-        self.soundscape_value=0 #always resets to zero
-
-
 class GrassAgent(Agent):
     def __init__(self,pos,model,is_grass):
         super().__init__(pos,model)
@@ -112,8 +86,7 @@ class MouseAgent(Agent):
         Pscan = 0.1,
         Lbias= 0.5,
         cohere= 1.0,
-        value=0,
-        stickiness = 0.5
+        value=0
     ):
         """
         Create a new mouse agent.
@@ -134,7 +107,7 @@ class MouseAgent(Agent):
 
         """
         super().__init__(pos, model)
-        # TODO make mouse start flexible
+        # TODO make mouse start user flexible
         # for now have the x,y locations for mouse intro points and cricket locations
         # for each initiation of the model, pick from these lists randomly
         self.pos = pos
@@ -149,13 +122,12 @@ class MouseAgent(Agent):
         self.Pscan = Pscan
         self.Lbias = Lbias
         self.cohere_factor = cohere
-        self.state_stickiness = stickiness
+        self.state_stickiness = 0.5
 
     def step(self):
         """
         Get the mouse's
             neighboring cells,
-            current soundscape value,
             and previous heading.
         Compute the new vector and prepare to move.
         """
@@ -167,15 +139,37 @@ class MouseAgent(Agent):
         else:
             dwell=self.Pdwell
         x=random.randint(0,100)
+
+        current_cell = self.model.grid.get_cell_list_contents(self.pos)
+
         if  x < 100*dwell:
             self.new_pos = self.pos
             self.speed = 0
+            # is cricket chirping? if so, update belief
+            print('we are paused and hr is {}'.format(self.model.mouse_hearing_range[0]))
+            neighbors = [i for i in self.model.grid.get_neighborhood(
+                self.pos, True, False, radius = self.model.mouse_hearing_range[0]) if len(self.model.grid.get_cell_list_contents([i]))>1]
+            cricket_cell = self.model.grid.get_cell_list_contents(neighbors)
+            for agent in cricket_cell:
+                print('type agent is {}'.format(agent))
+                if type(agent) is CricketAgent:
+                    print('chirp val is {}'.format(agent.chirp))
+                    if agent.chirp > 0:
+                        cricket_pos = agent.pos
+                        d = get_distance(self.pos,cricket_pos)
+                        hr = self.model.mouse_hearing_range[0]
+                        phr = self.model.mouse_perf_hearing_range[0]
+                        acc = self.model.mouse_accuracy_far[0]
+                        if d < phr:
+                            soundscape_value = cricket_pos
+                        elif d < int((hr-phr)/2):
+                            soundscape_value = [cricket_pos[0]+self.random.randint(-(acc/2),(acc/2)),cricket_pos[1]+ self.random.randint(-(acc/2),(acc/2))]
+                        elif d < hr:
+                            soundscape_value = [cricket_pos[0]+self.random.randint(-acc,acc),cricket_pos[1]+ self.random.randint(-acc,acc)]
+                        else: soundscape_value=0
+                        self.belief = soundscape_value
+                        print('updated belief to {}'.format(self.belief))
             # does the animal move at all this turn?
-            # TODO weight by confidence in sound location? time since last pause?
-        #elif np.all(soundinfo.soundscape_value > 0):
-            # is the cricket chirping? if so don't move! then update beliefs
-        #    self.new_pos = self.pos
-        #    self.belief = agent.soundscape_value
         else: #let's move!
             # where do I think this cricket is?
             if self.speed == 0:
