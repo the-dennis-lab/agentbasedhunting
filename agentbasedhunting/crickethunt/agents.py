@@ -79,7 +79,7 @@ class MouseAgent(Agent):
         model,
         speed=2,
         velocity=0,
-        belief = [0,0],
+        belief = [42,57], #center of arena
         range = 10,
         heading=0,
         dwell = 0.5,
@@ -139,19 +139,16 @@ class MouseAgent(Agent):
         else:
             dwell=self.Pdwell
         x=random.randint(0,100)
-
         current_cell = self.model.grid.get_cell_list_contents(self.pos)
 
         if  x < 100*dwell:
             self.new_pos = self.pos
             self.speed = 0
             # is cricket chirping? if so, update belief
-            print('we are paused and hr is {}'.format(self.model.mouse_hearing_range[0]))
             neighbors = [i for i in self.model.grid.get_neighborhood(
                 self.pos, True, False, radius = self.model.mouse_hearing_range[0]) if len(self.model.grid.get_cell_list_contents([i]))>1]
             cricket_cell = self.model.grid.get_cell_list_contents(neighbors)
             for agent in cricket_cell:
-                print('type agent is {}'.format(agent))
                 if type(agent) is CricketAgent:
                     print('chirp val is {}'.format(agent.chirp))
                     if agent.chirp > 0:
@@ -160,10 +157,12 @@ class MouseAgent(Agent):
                         hr = self.model.mouse_hearing_range[0]
                         phr = self.model.mouse_perf_hearing_range[0]
                         acc = self.model.mouse_accuracy_far[0]
+                        print('hr is {} phr is {} and acc is {}'.format(hr,phr,acc))
                         if d < phr:
                             soundscape_value = cricket_pos
                         elif d < int((hr-phr)/2):
-                            soundscape_value = [cricket_pos[0]+self.random.randint(-(acc/2),(acc/2)),cricket_pos[1]+ self.random.randint(-(acc/2),(acc/2))]
+                            half_acc = int(acc/2)
+                            soundscape_value = [cricket_pos[0]+self.random.randint(-half_acc,half_acc),cricket_pos[1]+ self.random.randint(-half_acc,half_acc)]
                         elif d < hr:
                             soundscape_value = [cricket_pos[0]+self.random.randint(-acc,acc),cricket_pos[1]+ self.random.randint(-acc,acc)]
                         else: soundscape_value=0
@@ -180,9 +179,11 @@ class MouseAgent(Agent):
             self.velocity = (self.heading * cohere_factor) + (current_belief * (1-cohere_factor))*((2*math.pi)/180)
             # in radians
             self.speed = self.random.randint(3,self.range)
-
-            new_x = int(self.pos[0] + (np.cos(self.velocity)*self.speed))
-            new_y = int(self.pos[1] + (np.sin(self.velocity)*self.speed))
+            print(self.pos)
+            print((np.sin(self.velocity)*self.speed))
+            print((np.cos(self.velocity)*self.speed))
+            new_x = int(self.pos[0] + (np.sin(self.velocity)*self.speed))
+            new_y = int(self.pos[1] + (np.cos(self.velocity)*self.speed))
 
             # what are my options for moving?
             candidate_cells = [
