@@ -73,14 +73,15 @@ class HuntingGrounds(Model):
             {"MouseAgent": lambda m: 1}
         )
 
-
         # Create grass patches
         grass_distribution = np.genfromtxt("crickethunt/hex_map.txt")
         for _, x, y in self.grid.coord_iter():
+            print('x is {}'.format(x))
+            print('y is {}'.format(y))
             is_grass = grass_distribution[x, y]
             grass = GrassAgent(self,(x,y),is_grass)
             self.grid.place_agent(grass, (x, y))
-            self.schedule.add(grass)
+            #self.schedule.add(grass)
 
         # Create mouse:
         pos_mouse = self.random.choice([(2,58),(21,17),(65,17),(84,58),(65,98),(21,98)])
